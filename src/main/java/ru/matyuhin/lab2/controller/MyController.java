@@ -18,6 +18,7 @@ import ru.matyuhin.lab2.service.ValidationService;
 import ru.matyuhin.lab2.util.DateTimeUtil;
 
 import javax.validation.Valid;
+import java.text.ParsePosition;
 import java.util.Date;
 
 @Slf4j
@@ -42,7 +43,7 @@ public class MyController {
     public ResponseEntity<Response> feedback(@Valid @RequestBody Request request, BindingResult bindingResult) {
 
         log.info("request: {}", request);
-
+        DifferentTime(request);
         Response response = Response.builder()
                 .uid(request.getUid())
                 .operationUid(request.getOperationUid())
@@ -53,7 +54,6 @@ public class MyController {
                 .build();
 
         log.info("response: {}", response);
-
         try {
             validationService.isValid(bindingResult);
             unsupportedCodeService.isSupported(request);
@@ -80,5 +80,12 @@ public class MyController {
         modifyResponseService.modify(response);
 
         return new ResponseEntity<>(modifyResponseService.modify(response), HttpStatus.OK);
+    }
+
+    private void DifferentTime(Request request)
+    {
+        var oldTime = DateTimeUtil.getCustomFormat().parse(request.getSystemTime(), new ParsePosition(0));
+        var currentTime = new Date();
+        log.info("difference time: {} ms", currentTime.getTime() - oldTime.getTime());
     }
 }
